@@ -135,7 +135,8 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 		return
 	}
 
-	course, err := h.courseService.CreateCourse(instructorID.(uint), req)
+	instructorIDValue := instructorID.(uint)
+	course, err := h.courseService.CreateCourse(instructorIDValue, req)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create course", err.Error())
 		return
@@ -143,7 +144,7 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 
 	// Audit log
 	_ = h.auditLogRepo.Create(&models.SystemAuditLog{
-		UserID:     &instructorID.(uint),
+		UserID:     &instructorIDValue,
 		Action:     "course_created",
 		EntityType: "course",
 		EntityID:   &course.ID,
@@ -183,7 +184,7 @@ func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 		return
 	}
 
-	if err := h.courseService.courseRepo.Delete(uint(courseID)); err != nil {
+	if err := h.courseService.DeleteCourse(uint(courseID)); err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to delete course", err.Error())
 		return
 	}

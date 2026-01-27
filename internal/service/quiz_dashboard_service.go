@@ -118,7 +118,7 @@ func (s *QuizService) SubmitAttempt(userID, quizID, quizAttemptID uint, answers 
 
 	for _, question := range quiz.Questions {
 		if userAnswer, exists := answers[question.ID]; exists {
-			if isCorrectAnswer(question, userAnswer) {
+			if isCorrectAnswer(&question, userAnswer) {
 				score++
 			}
 		}
@@ -235,8 +235,7 @@ func (s *DashboardService) GetUserDashboard(userID uint) (*DashboardData, error)
 	_ = completedEnrollments // Use if needed
 
 	// Get certificates
-	certificates, _ := s.certificateRepo.GetUserCertificates(userID, 1, 1000)
-	totalCertificates := int64(len(certificates))
+	_, totalCertificates, _ := s.certificateRepo.GetUserCertificates(userID, 1, 1000)
 
 	// Get earned badges count
 	earnedBadgeCount, _ := s.badgeProgressRepo.GetUserEarnedBadgeCount(userID)

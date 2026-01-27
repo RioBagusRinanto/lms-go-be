@@ -124,10 +124,10 @@ type Quiz struct {
 	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// Relations
-	Course    Course        `gorm:"foreignKey:CourseID"`
-	Lesson    *Lesson       `gorm:"foreignKey:LessonID"`
-	Questions []Question    `gorm:"foreignKey:QuizID"`
-	Attempts  []QuizAttempt `gorm:"foreignKey:QuizID"`
+	Course       Course        `gorm:"foreignKey:CourseID"`
+	Lesson       *Lesson       `gorm:"foreignKey:LessonID"`
+	Questions    []Question    `gorm:"foreignKey:QuizID"`
+	QuizAttempts []QuizAttempt `gorm:"foreignKey:QuizID"`
 }
 
 // Question represents a single question in a quiz

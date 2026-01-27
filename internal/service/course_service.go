@@ -209,6 +209,11 @@ func (s *CourseService) GetCourseReviews(courseID uint, page, pageSize int) ([]m
 	return s.reviewRepo.GetCourseReviews(courseID, page, pageSize)
 }
 
+// DeleteCourse deletes a course
+func (s *CourseService) DeleteCourse(courseID uint) error {
+	return s.courseRepo.Delete(courseID)
+}
+
 // ConvertCourseToDTO converts course model to DTO
 func ConvertCourseToDTO(course *models.Course) *CourseDTO {
 	return &CourseDTO{

@@ -40,7 +40,8 @@ func (h *EnrollmentHandler) Enroll(c *gin.Context) {
 		return
 	}
 
-	enrollment, err := h.enrollmentService.EnrollUser(userID.(uint), req.CourseID)
+	userIDValue := userID.(uint)
+	enrollment, err := h.enrollmentService.EnrollUser(userIDValue, req.CourseID)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusBadRequest, "Enrollment failed", err.Error())
 		return
@@ -48,7 +49,7 @@ func (h *EnrollmentHandler) Enroll(c *gin.Context) {
 
 	// Audit log
 	_ = h.auditLogRepo.Create(&models.SystemAuditLog{
-		UserID:     &userID.(uint),
+		UserID:     &userIDValue,
 		Action:     "course_enroll",
 		EntityType: "enrollment",
 		EntityID:   &enrollment.ID,

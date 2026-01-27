@@ -44,7 +44,6 @@ func main() {
 	badgeProgressRepo := repository.NewBadgeProgressRepository(db)
 	reviewRepo := repository.NewCourseReviewRepository(db)
 	auditLogRepo := repository.NewSystemAuditLogRepository(db)
-	downloadLogRepo := repository.NewDownloadLogRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo)

@@ -244,9 +244,11 @@ func (r *CourseReviewRepository) Delete(id uint) error {
 // GetCourseAverageRating gets average rating for a course
 func (r *CourseReviewRepository) GetCourseAverageRating(courseID uint) (float64, error) {
 	var avgRating float64
-	if err := r.db.Model(&models.CourseReview{}).
+	err := r.db.Model(&models.CourseReview{}).
 		Where("course_id = ?", courseID).
-		Select("COALESCE(AVG(rating), 0)").Row().Scan(&avgRating).Error; err != nil {
+		Select("COALESCE(AVG(rating), 0)").
+		Row().Scan(&avgRating)
+	if err != nil {
 		return 0, err
 	}
 	return avgRating, nil
