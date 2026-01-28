@@ -48,7 +48,7 @@ func (r *CourseRepository) GetAll(page, pageSize int) ([]models.Course, int64, e
 	var courses []models.Course
 	var total int64
 
-	if err := r.db.Where("is_published = ?", true).Count(&total).Error; err != nil {
+	if err := r.db.Model(&models.Course{}).Where("is_published = ?", true).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -66,7 +66,7 @@ func (r *CourseRepository) GetByCategory(category string, page, pageSize int) ([
 	var courses []models.Course
 	var total int64
 
-	if err := r.db.Where("category = ? AND is_published = ?", category, true).
+	if err := r.db.Model(&models.Course{}).Where("category = ? AND is_published = ?", category, true).
 		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -95,7 +95,7 @@ func (r *CourseRepository) GetByInstructor(instructorID uint, page, pageSize int
 	var courses []models.Course
 	var total int64
 
-	if err := r.db.Where("instructor_id = ?", instructorID).Count(&total).Error; err != nil {
+	if err := r.db.Model(&models.Course{}).Where("instructor_id = ?", instructorID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -115,7 +115,7 @@ func (r *CourseRepository) SearchCourses(query string, page, pageSize int) ([]mo
 
 	searchQuery := fmt.Sprintf("%%%s%%", query)
 
-	if err := r.db.Where("(title ILIKE ? OR description ILIKE ?) AND is_published = ?",
+	if err := r.db.Model(&models.Course{}).Where("(title ILIKE ? OR description ILIKE ?) AND is_published = ?",
 		searchQuery, searchQuery, true).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}

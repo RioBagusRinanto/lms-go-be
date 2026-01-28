@@ -115,7 +115,7 @@ func (r *EnrollmentRepository) GetCourseEnrollments(courseID uint, page, pageSiz
 	var enrollments []models.Enrollment
 	var total int64
 
-	if err := r.db.Where("course_id = ?", courseID).Count(&total).Error; err != nil {
+	if err := r.db.Model(&models.Enrollment{}).Where("course_id = ?", courseID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 

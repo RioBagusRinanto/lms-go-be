@@ -35,7 +35,7 @@ func (r *CoinTransactionRepository) GetUserTransactions(userID uint, page, pageS
 	var transactions []models.CoinTransaction
 	var total int64
 
-	if err := r.db.Where("user_id = ?", userID).Count(&total).Error; err != nil {
+	if err := r.db.Model(&models.CoinTransaction{}).Where("user_id = ?", userID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 

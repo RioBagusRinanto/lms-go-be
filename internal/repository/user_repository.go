@@ -73,7 +73,7 @@ func (r *UserRepository) GetByRole(role string, page, pageSize int) ([]models.Us
 	var users []models.User
 	var total int64
 
-	if err := r.db.Where("role = ?", role).Count(&total).Error; err != nil {
+	if err := r.db.Model(&models.User{}).Where("role = ?", role).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -150,7 +150,7 @@ func (r *UserRepository) SearchUsers(query string, page, pageSize int) ([]models
 
 	searchQuery := fmt.Sprintf("%%%s%%", query)
 
-	if err := r.db.Where("email ILIKE ? OR first_name ILIKE ? OR last_name ILIKE ?",
+	if err := r.db.Model(&models.User{}).Where("email ILIKE ? OR first_name ILIKE ? OR last_name ILIKE ?",
 		searchQuery, searchQuery, searchQuery).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}

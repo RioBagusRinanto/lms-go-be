@@ -106,7 +106,7 @@ func (r *SystemAuditLogRepository) GetUserLogs(userID uint, page, pageSize int) 
 	var logs []models.SystemAuditLog
 	var total int64
 
-	if err := r.db.Where("user_id = ?", userID).Count(&total).Error; err != nil {
+	if err := r.db.Model(&models.SystemAuditLog{}).Where("user_id = ?", userID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -124,7 +124,7 @@ func (r *SystemAuditLogRepository) GetLogsByAction(action string, page, pageSize
 	var logs []models.SystemAuditLog
 	var total int64
 
-	if err := r.db.Where("action = ?", action).Count(&total).Error; err != nil {
+	if err := r.db.Model(&models.SystemAuditLog{}).Where("action = ?", action).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -157,7 +157,7 @@ func (r *DownloadLogRepository) GetUserDownloads(userID uint, page, pageSize int
 	var logs []models.DownloadLog
 	var total int64
 
-	if err := r.db.Where("user_id = ?", userID).Count(&total).Error; err != nil {
+	if err := r.db.Model(&models.DownloadLog{}).Where("user_id = ?", userID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -209,7 +209,7 @@ func (r *CourseReviewRepository) GetCourseReviews(courseID uint, page, pageSize 
 	var reviews []models.CourseReview
 	var total int64
 
-	if err := r.db.Where("course_id = ?", courseID).Count(&total).Error; err != nil {
+	if err := r.db.Model(&models.CourseReview{}).Where("course_id = ?", courseID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
