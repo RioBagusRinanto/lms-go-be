@@ -1,0 +1,1639 @@
+{
+  "info": {
+    "_postman_id": "lms-backend-collection-2024",
+    "name": "LMS Backend - Complete API Collection",
+    "description": "Professional Postman collection for testing all LMS Backend endpoints including authentication, courses, enrollments, progress tracking, quizzes, gamification, and admin operations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "contact": {
+      "name": "LMS Backend Development Team",
+      "url": "https://github.com/yourusername/lms-go-be"
+    }
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "description": "User authentication endpoints - register, login, profile management",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Registration successful', function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.code).to.eql(200);",
+                  "        pm.expect(jsonData.data.email).to.eql(pm.environment.get('test_email'));",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"TestPass123!\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\",\n  \"department\": \"Engineering\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.test('Login successful', function () {",
+                  "        pm.expect(jsonData.code).to.eql(200);",
+                  "        pm.expect(jsonData.data.token).to.be.a('string');",
+                  "    });",
+                  "    // Save token for subsequent requests",
+                  "    pm.environment.set('auth_token', jsonData.data.token);",
+                  "    pm.environment.set('user_id', jsonData.data.user.id);",
+                  "    console.log('Token saved: ' + jsonData.data.token.substring(0, 20) + '...');",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"TestPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response contains user data', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('email');",
+                  "    pm.expect(jsonData.data).to.have.property('full_name');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Updated\",\n  \"last_name\": \"Name\",\n  \"department\": \"Product\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"old_password\": \"TestPass123!\",\n  \"new_password\": \"NewPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "change-password"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Courses",
+      "description": "Course management endpoints - create, read, search, publish courses",
+      "item": [
+        {
+          "name": "Get All Courses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has pagination', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.pagination).to.have.property('page');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/courses?page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "courses"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/courses/search?q=golang&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "courses", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "golang"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Courses by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/courses/category/Programming",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "courses", "category", "Programming"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('course_id', jsonData.data.id);",
+                  "    pm.test('Course details retrieved', function () {",
+                  "        pm.expect(jsonData.data).to.have.property('id');",
+                  "        pm.expect(jsonData.data).to.have.property('title');",
+                  "        pm.expect(jsonData.data).to.have.property('lessons');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/courses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "courses", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Course (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced Go Programming\",\n  \"description\": \"Master advanced Go concepts and patterns\",\n  \"category\": \"Programming\",\n  \"duration_hours\": 30,\n  \"difficulty\": \"advanced\",\n  \"is_mandatory\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/courses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "courses"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Course (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced Go Programming - Updated\",\n  \"description\": \"Master advanced Go concepts and design patterns\",\n  \"duration_hours\": 35\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/courses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "courses", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Course (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/courses/1/publish",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "courses", "1", "publish"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Course (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/courses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "courses", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Course Review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Excellent course! Very comprehensive and well structured. The instructor explains concepts clearly.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/1/review",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses", "1", "review"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Enrollments",
+      "description": "Course enrollment management endpoints",
+      "item": [
+        {
+          "name": "Enroll in Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('enrollment_id', jsonData.data.id);",
+                  "    pm.test('Enrollment successful', function () {",
+                  "        pm.expect(jsonData.data.status).to.eql('enrolled');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/enroll",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses", "enroll"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Enrollments",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/my-enrollments?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses", "my-enrollments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get In-Progress Courses",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/in-progress?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses", "in-progress"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Completed Courses",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/completed?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses", "completed"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Mandatory Courses",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/mandatory?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses", "mandatory"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Progress Tracking",
+      "description": "Learning progress tracking endpoints",
+      "item": [
+        {
+          "name": "Track Video Progress",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Progress tracked', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('watched_percentage');",
+                  "    pm.expect(jsonData.data).to.have.property('is_completed');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": 1,\n  \"lesson_id\": 1,\n  \"watched_duration\": 450,\n  \"total_duration\": 600\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/progress/track",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "progress", "track"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course Progress",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/progress/course/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "progress", "course", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Lesson Progress",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/progress/lesson/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "progress", "lesson", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Quizzes & Assessments",
+      "description": "Quiz and assessment endpoints",
+      "item": [
+        {
+          "name": "Start Quiz Attempt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('attempt_id', jsonData.data.attempt_id);",
+                  "    pm.test('Quiz attempt started', function () {",
+                  "        pm.expect(jsonData.data.questions).to.be.an('array');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quiz_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/quiz/start",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quiz", "start"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Quiz Attempt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Quiz scored correctly', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('score');",
+                  "    pm.expect(jsonData.data).to.have.property('percentage');",
+                  "    pm.expect(jsonData.data).to.have.property('passed');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quiz_id\": 1,\n  \"answers\": {\n    \"1\": \"Option A\",\n    \"2\": \"true\",\n    \"3\": \"Option C\"\n  },\n  \"time_spent\": 600\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/quiz/submit/{{attempt_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quiz", "submit", "{{attempt_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Quiz Attempts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quiz/1/attempts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quiz", "1", "attempts"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Gamification",
+      "description": "Gamification features - coins, badges, leaderboard",
+      "item": [
+        {
+          "name": "Get User Coins",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Coins retrieved', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('total_coins');",
+                  "    pm.expect(jsonData.data).to.have.property('coins_earned');",
+                  "    pm.expect(jsonData.data).to.have.property('coins_spent');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/coins",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "coins"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Coin Transactions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/coins/transactions?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "coins", "transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Badges",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Badges retrieved', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/badges",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "badges"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Leaderboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Leaderboard retrieved', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "    if (jsonData.data.length > 0) {",
+                  "        pm.expect(jsonData.data[0]).to.have.property('rank');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/leaderboard?order_by=coins&limit=100",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "leaderboard"],
+              "query": [
+                {
+                  "key": "order_by",
+                  "value": "coins"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Dashboard",
+      "description": "User dashboard endpoint with comprehensive statistics",
+      "item": [
+        {
+          "name": "Get User Dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Dashboard has all required fields', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('total_coins');",
+                  "    pm.expect(jsonData.data).to.have.property('current_badge_level');",
+                  "    pm.expect(jsonData.data).to.have.property('mandatory_courses');",
+                  "    pm.expect(jsonData.data).to.have.property('in_progress_courses');",
+                  "    pm.expect(jsonData.data).to.have.property('leaderboard_rank');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8. User Management",
+      "description": "User profile and statistics endpoints",
+      "item": [
+        {
+          "name": "Get User Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/profile/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "profile", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9. Admin Operations",
+      "description": "Admin-only endpoints for user and system management",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users?page=1&role=learner",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "role",
+                  "value": "learner"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Users (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users?search=john&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "users"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "john"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get System Audit Logs (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/audit-logs?page=1&action=login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "audit-logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "action",
+                  "value": "login"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Test Workflow",
+      "description": "Complete workflow for testing the entire system",
+      "item": [
+        {
+          "name": "1. Register Test User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generate unique email for test",
+                  "pm.environment.set('test_email', 'testuser' + Date.now() + '@example.com');"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User registered successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"TestPass123!\",\n  \"first_name\": \"Workflow\",\n  \"last_name\": \"Test\",\n  \"department\": \"Engineering\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Login and Get Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login successful and token obtained', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('auth_token', jsonData.data.token);",
+                  "    pm.environment.set('user_id', jsonData.data.user.id);",
+                  "    pm.expect(jsonData.data.token).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"TestPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Browse Available Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/courses?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "courses"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Enroll in Course",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/enroll",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses", "enroll"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Track Video Progress",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": 1,\n  \"lesson_id\": 1,\n  \"watched_duration\": 540,\n  \"total_duration\": 600\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/progress/track",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "progress", "track"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Start Quiz",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('attempt_id', jsonData.data.attempt_id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quiz_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/quiz/start",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quiz", "start"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Submit Quiz",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quiz_id\": 1,\n  \"answers\": {\n    \"1\": \"Option A\"\n  },\n  \"time_spent\": 300\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/quiz/submit/{{attempt_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "quiz", "submit", "{{attempt_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8. View Dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Dashboard shows complete user info', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.total_coins).to.be.a('number');",
+                  "    pm.expect(jsonData.data.leaderboard_rank).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. Check Coins and Badges",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/coins",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "coins"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. View Leaderboard",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/leaderboard?order_by=coins",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "leaderboard"],
+              "query": [
+                {
+                  "key": "order_by",
+                  "value": "coins"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string",
+      "description": "Base URL for the LMS Backend API"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string",
+      "description": "JWT authentication token for learner"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string",
+      "description": "JWT authentication token for admin user"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string",
+      "description": "Current user ID"
+    },
+    {
+      "key": "course_id",
+      "value": "1",
+      "type": "string",
+      "description": "Course ID for testing"
+    },
+    {
+      "key": "enrollment_id",
+      "value": "",
+      "type": "string",
+      "description": "Enrollment ID"
+    },
+    {
+      "key": "attempt_id",
+      "value": "",
+      "type": "string",
+      "description": "Quiz attempt ID"
+    },
+    {
+      "key": "test_email",
+      "value": "testuser@example.com",
+      "type": "string",
+      "description": "Email for test user"
+    }
+  ]
+}
