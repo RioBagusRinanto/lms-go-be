@@ -14,6 +14,14 @@ type Config struct {
 	Server   ServerConfig
 	JWT      JWTConfig
 	Logger   LoggerConfig
+	Supabase SupabaseConfig
+}
+
+// SupabaseConfig holds Supabase configuration
+type SupabaseConfig struct {
+	URL            string
+	PublishableKey string
+	AnonKey        string
 }
 
 // DatabaseConfig holds database configuration
@@ -71,6 +79,11 @@ func LoadConfig() *Config {
 		},
 		Logger: LoggerConfig{
 			Level: getEnv("LOG_LEVEL", "info"),
+		},
+		Supabase: SupabaseConfig{
+			URL:            getEnv("SUPABASE_URL", ""),
+			PublishableKey: getEnv("SUPABASE_PUBLISHABLE_KEY", ""),
+			AnonKey:        getEnv("SUPABASE_ANON_KEY", ""),
 		},
 	}
 }
